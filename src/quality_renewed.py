@@ -15,6 +15,7 @@ from datetime import datetime
 import os 
 from astropy.io import fits
 import matplotlib.pyplot as plt
+import pandas as pd
 
 def plot(file, col, row): #for plotting full sun image with sun center
     plt.figure()
@@ -23,18 +24,15 @@ def plot(file, col, row): #for plotting full sun image with sun center
     plt.title(file[-44:])
     plt.show()
     plt.close()
+def qual_plot(date_ls, mean_ls):
+    plt.figure("Quality Plot")
+    plt.scatter(date_ls, mean_ls)
+    plt.title('Quality plot- '+filt_name)
+    plt.xticks(rotation=45)
+    plt.show()
 
-if __name__=='__main__':
-    ##### USER-DEFINED #####
-    filt_list=['NB01','NB02','NB03','NB04','NB05','NB06','NB07','NB08','BB01','BB02','BB03']
-    filt_name=filt_list[2]
-    project_path= os.path.expanduser('~/Dropbox/Janmejoy_SUIT_Dropbox/scripts/photometry/running_quality_checker_4k_v2_project/')
-    imgshow=False
-    thres=1000
-    ########################
-    
+def data_gen(filt_name, data_folders_list, thres, imgshow=False):    
     size=250 #half dimension of analysis box
-    data_folders_list= sorted(glob.glob(project_path+'data/raw/*/*/*/'))[13:] #list of folders normal_4k
     date_ls=[] #blank date list
     mean_ls=[] #blank mean vals list
     for folder in data_folders_list: #looping through all folders
@@ -58,8 +56,17 @@ if __name__=='__main__':
                     print('Skipping', file[-64:])
             else:
                 print('Partial File:', file[-64:])
-    plt.figure("Quality Plot")
-    plt.scatter(date_ls, mean_ls)
-    plt.title('Quality plot- '+filt_name)
-    plt.xticks(rotation=45)
-    plt.show()
+    return(date_ls, mean_ls)
+
+if __name__=='__main__':
+    ##### USER-DEFINED #####
+    filt_list=['NB01','NB02','NB03','NB04','NB05','NB06','NB07','NB08','BB01','BB02','BB03']
+    filt_name=filt_list[5]
+    project_path= os.path.expanduser('~/Dropbox/Janmejoy_SUIT_Dropbox/scripts/photometry/running_quality_checker_4k_v2_project/')
+    data_folders_list= sorted(glob.glob(project_path+'data/raw/*/*/*/'))[13:] #list of folders normal_4k
+    imgshow=False
+    thres=1000
+    ########################
+    date_ls, mean_ls= data_gen(filt_name, data_folders_list, thres, imgshow=False)
+    dict={'date': date_ls, 'mean': mean_ls}
+    df= pd.DataFrame(dict)
