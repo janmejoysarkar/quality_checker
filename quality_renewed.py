@@ -16,8 +16,9 @@ import os
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import pandas as pd
+from concurrent.futures import ProcessPoolExecutor
 
-def plot(file, col, row): #for plotting full sun image with sun center
+def plot(file, data, col, row): #for plotting full sun image with sun center
     plt.figure()
     plt.imshow(data, origin='lower')
     plt.plot(col, row, 'o', color='red')
@@ -52,7 +53,7 @@ def data_gen(filt_name, data_folders_list, thres, imgshow=False):
                     #threshold to remove door closed images and poor sun center fit images
                     mean_ls.append(mean)
                     date_ls.append(dt_obj)
-                    if (imgshow==True): plot(file, col, row) #plot the sun image with sun center
+                    if (imgshow==True): plot(file, data, col, row) #plot the sun image with sun center
                     break #break the loop if one image is found in the folder meeting these criteria.
                 else:
                     print('Skipping', file[-64:])
@@ -61,19 +62,35 @@ def data_gen(filt_name, data_folders_list, thres, imgshow=False):
     qual_plot(filt_name, date_ls, mean_ls, True)
     return(date_ls, mean_ls)
 
+def process(filt_thres):
+    filt_name, thres= filt_thres
+    date_ls, mean_ls= data_gen(filt_name, data_folders_list, thres, imgshow=False)
+    dict={'date': date_ls, 'mean': mean_ls}
+    df= pd.DataFrame(dict)
+    df.to_csv(f'{project_path}data/interim/qual_data_{filt_name}.csv',index=False, header=False, sep='\t')
+    
 if __name__=='__main__':
     ##### USER-DEFINED #####
-    project_path= os.path.expanduser('~/Dropbox/Janmejoy_SUIT_Dropbox/scripts/photometry/running_quality_checker_4k_v2_project/')
+    project_path= os.path.expanduser('~/Dropbox/Janmejoy_SUIT_Dropbox/photometry/photometry_scripts/running_quality_checker_4k_v2_project/')
     data_folders_list= sorted(glob.glob(project_path+'data/raw/*/*/*/'))[13:] #list of folders normal_4k
     imgshow=False
-    thres=1000
     ########################
     
+    filt_ls_thres_ls= [("NB01",1000),("NB02",1000),("NB03",1000),("NB04",1000),
+                 ("NB05",1000),("NB06",25000),("NB07",25000),("NB08",3200),
+                 ("BB01",1000),("BB02",1000),("BB03",18000)] 
+    #list of filter names and corresponding threshold values
+    
+    with ProcessPoolExecutor() as executor:
+        executor.map(process, filt_ls_thres_ls)
+    
+'''    
     filt_list=['NB01','NB02','NB03','NB04','NB05','NB06','NB07','NB08','BB01','BB02','BB03']
     thres_list=[1000]*5+[25000]*2+[3200]+[1000]*2+[18000] #thres values for each filter
+    
     for filt_name, thres in zip(filt_list,thres_list):
-        date_ls, mean_ls= data_gen(filt_name, data_folders_list, thres, imgshow=False)
+        date_ls, mean_ls= data_gen(filt_name, thres, imgshow=False)
         dict={'date': date_ls, 'mean': mean_ls}
         df= pd.DataFrame(dict)
         df.to_csv(f'{project_path}data/interim/qual_data_{filt_name}.csv',index=False, header=False, sep='\t')
-        
+'''        
