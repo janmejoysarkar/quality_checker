@@ -15,7 +15,6 @@ from datetime import datetime
 import os 
 from astropy.io import fits
 import matplotlib.pyplot as plt
-import pandas as pd
 from concurrent.futures import ProcessPoolExecutor
 
 def plot(file, data, col, row): #for plotting full sun image with sun center
