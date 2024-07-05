@@ -8,6 +8,11 @@ Created on Thu Mar 21 15:11:02 2024
 -This runs on entire data. Should be modified to update one text file.
 -2024-06-19: Added Vertical line to mark date of baking ending.
 - Added check for files <1000 byte size
+-2024-07-05: Automated plot saving disabled.
+-Error messages:
+    zero_size_error: File size is not as per requirement.
+    sun_center_error: Sun center does not fall on the sun, 
+    or Sun radius is highly deviant.
 @author: janmejoyarch
 """
 import glob
@@ -37,7 +42,7 @@ def qual_plot(filt_name, date_ls, mean_ls, save=False):
     plt.ylabel("Exposure time normalized relative intensity")
     plt.legend()
     if (save == True): plt.savefig(f"{project_path}/products/{filt_name}.pdf", dpi=300)
-    plt.show()
+    if show_plot: plt.show()
 
 def data_gen(filt_name, data_folders_list, thres, imgshow=False):    
     size=250 #half dimension of analysis box
@@ -47,7 +52,7 @@ def data_gen(filt_name, data_folders_list, thres, imgshow=False):
         file_list=glob.glob(folder+'/normal_4k/*'+filt_name+'.fits') #generating file list in each normal_4k folder
         for file in file_list: #looping through normal_4k folder for one day
             if os.path.getsize(file) < 1e6:
-                print("0 size:", os.path.basename(file))
+                print("zero_size_error:", os.path.basename(file))
                 continue
             hdu= fits.open(file)[0]
             qdesc= hdu.header['QDESC']
@@ -68,7 +73,7 @@ def data_gen(filt_name, data_folders_list, thres, imgshow=False):
                 print("Plotting:", os.path.basename(file))
                 break #break the loop if one image is found in the folder meeting these criteria.
             else:
-                print('Sun Cent Error:', os.path.basename(file))
+                print('sun_cent_error:', os.path.basename(file))
     qual_plot(filt_name, date_ls, mean_ls, True)
     return(date_ls, mean_ls)
 
@@ -84,6 +89,7 @@ if __name__=='__main__':
     project_path= os.path.expanduser('~/Dropbox/Janmejoy_SUIT_Dropbox/photometry/photometry_scripts/running_quality_checker_4k_v2_project/')
     data_folders_list= sorted(glob.glob(project_path+'data/raw/*/*/*/')) #list of folders normal_4k
     data_folders_list= data_folders_list[15:] 
+    show_plot=False
     ########################
     
     filt_ls_thres_ls= [("NB01",1000),("NB02",1000),("NB03",1000),("NB04",1000),
