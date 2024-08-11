@@ -37,8 +37,13 @@ def qual_plot(filt_name, date_ls, mean_ls, save=False):
     plt.scatter(date_ls, mean_ls/np.max(mean_ls))
     plt.title(f'Quality plot- {filt_name} | Max: {round(np.max(mean_ls),0)}')
     plt.xticks(rotation=30)
-    plt.axvline(datetime.strptime("2024-04-23", '%Y-%m-%d'), color='black', linestyle='--', label= "Baking Start (2024-04-23)")
-    plt.axvline(datetime.strptime("2024-05-13", '%Y-%m-%d'), color='black', linestyle='--', label= "Baking Completion (2024-05-13)")
+    #plt.axvline(datetime.strptime("2024-04-23", '%Y-%m-%d'), color='blue', linestyle='--', label= "Baking Start (2024-04-23)")
+    #plt.axvline(datetime.strptime("2024-05-13", '%Y-%m-%d'), color='red', linestyle='--', label= "Baking Completion (2024-05-13)")
+    #plt.axvline(datetime.strptime("2024-07-25", '%Y-%m-%d'), color='blue', linestyle='--', label= "Baking Start (2024-07-25)")
+    #plt.axvline(datetime.strptime("2024-08-09", '%Y-%m-%d'), color='red', linestyle='--', label= "Baking Completion (2024-08-09)")
+    for bake_start, bake_end in bake_list:
+        plt.axvline(datetime.strptime(bake_start, '%Y-%m-%d'), color='blue', linestyle='--', label= f"Baking Start_{bake_start}")
+        plt.axvline(datetime.strptime(bake_end, '%Y-%m-%d'), color='red', linestyle='--', label= f"Baking Start_{bake_end}")
     plt.ylabel("Exposure time normalized relative intensity")
     plt.legend()
     if (save == True): plt.savefig(f"{project_path}/products/{filt_name}.pdf", dpi=300)
@@ -50,6 +55,7 @@ def data_gen(filt_name, data_folders_list, thres, imgshow=False):
     mean_ls=[] #blank mean vals list
     for folder in data_folders_list: #looping through all folders
         file_list=glob.glob(folder+'/normal_4k/*'+filt_name+'.fits') #generating file list in each normal_4k folder
+        file_list= file_list+glob.glob(folder+'/engg4/*'+filt_name+'.fits')
         for file in file_list: #looping through normal_4k folder for one day
             if os.path.getsize(file) < 1e6:
                 print("zero_size_error:", os.path.basename(file))
@@ -58,6 +64,10 @@ def data_gen(filt_name, data_folders_list, thres, imgshow=False):
             qdesc= hdu.header['QDESC']
             if (qdesc != 'Complete Image'): #checks if the image is complete image
                 print('Partial File:', os.path.basename(file))
+                continue
+            naxis1= hdu.header['NAXIS1']
+            if (naxis1 != 4096): #checks if the image is complete image
+                print('Not_4k:', os.path.basename(file))
                 continue
             col, row= int(hdu.header['CRPIX1']), int(hdu.header['CRPIX2']) #sun center val
             dt_obj= datetime.strptime(hdu.header['DHOBT_DT'].split('.')[0], '%Y-%m-%dT%H:%M:%S') #date time
@@ -90,6 +100,7 @@ if __name__=='__main__':
     data_folders_list= sorted(glob.glob(project_path+'data/raw/*/*/*/')) #list of folders normal_4k
     data_folders_list= data_folders_list[15:] 
     show_plot=False
+    bake_list=[("2024-04-23", "2024-05-13"),("2024-08-01", "2024-08-09")]
     ########################
     
     filt_ls_thres_ls= [("NB01",1000),("NB02",1000),("NB03",1000),("NB04",1000),
