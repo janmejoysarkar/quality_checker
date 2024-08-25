@@ -96,7 +96,7 @@ if __name__=='__main__':
     data_folders_list= sorted(glob.glob(project_path+'data/raw/*/*/*/')) #list of folders normal_4k
     data_folders_list= data_folders_list[15:] 
     show_plot=False
-    bake_list=[("2024-04-23", "2024-05-13"),("2024-08-01", "2024-08-09")]
+    bake_list=[("2024-04-23", "2024-05-13"),("2024-08-01", "2024-08-09"), ("2024-08-12", "2024-08-20")]
     ########################
     
     filt_ls_thres_ls= [("NB01",1000),("NB02",1000),("NB03",1000),("NB04",1000),
