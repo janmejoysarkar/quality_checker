@@ -95,7 +95,7 @@ if __name__=='__main__':
     project_path= os.path.expanduser('~/Dropbox/Janmejoy_SUIT_Dropbox/photometry/photometry_scripts/running_quality_checker_4k_v2_project/')
     data_folders_list= sorted(glob.glob(project_path+'data/raw/*/*/*/')) #list of folders normal_4k
     data_folders_list= data_folders_list[15:] 
-    show_plot=False
+    show_plot=True
     bake_list=[("2024-04-23", "2024-05-13"),("2024-08-01", "2024-08-09"), ("2024-08-12", "2024-08-20"), ("2024-08-22", "2024-09-11")]
     ########################
     
