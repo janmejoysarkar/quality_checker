@@ -45,14 +45,14 @@ def plotting(led_stats, led_typ):
     plt.scatter(led_stats[:,0], led_stats[:,1]/np.max(led_stats[:,1]))
     plt.ylabel("Normalized Counts")
     plt.xlabel("Date")
-    plt.title(f"LED: {led_typ} nm")
-    plt.savefig(f'{project_path}/products/{led_typ}.pdf', dpi=300)
+    plt.title(f"{led_typ} nm")
+    plt.savefig(f'{project_path}/products/LED_{led_typ}.pdf', dpi=300)
     plt.show()
 
 def process(led):
     led_typ, led_id= led
     folders= sorted(glob.glob(os.path.join(project_path,
-                   f'data/raw/2024_laptop/*/*/led{led_typ}/')))
+                   f'data/raw/2024/*/*/led{led_typ}/')))
     led_stats= finder(folders, led_id)
     plotting(led_stats, led_typ)
 
