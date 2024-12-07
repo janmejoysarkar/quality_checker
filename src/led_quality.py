@@ -39,13 +39,18 @@ def finder(folders, ledid):
     return np.array(led_ls)
 
 def plotting(led_stats, led_typ):
-    y= (led_stats[:,1]-led_stats[:,1].min())/\
-    (led_stats[:,1].max()-led_stats[:,1].min())
+    y= (led_stats[:,1]-led_stats[:,1].min())/(led_stats[:,1].max()-led_stats[:,1].min())
     plt.figure()
     plt.scatter(led_stats[:,0], led_stats[:,1]/np.max(led_stats[:,1]))
+    plt.xticks(rotation=30)
+    for bake_start, bake_end in bake_list:
+        plt.axvline(datetime.strptime(bake_start, '%Y-%m-%d'), color='blue'
+                    , linestyle='--', label= f"BakeStart_{bake_start}")
+        plt.axvline(datetime.strptime(bake_end, '%Y-%m-%d'), color='red', 
+                    linestyle='--', label= f"BakeEnd_{bake_end}")
     plt.ylabel("Normalized Counts")
     plt.xlabel("Date")
-    plt.title(f"{led_typ} nm")
+    plt.title(f"LED: {led_typ} nm")
     plt.savefig(f'{project_path}/products/LED_{led_typ}.pdf', dpi=300)
     plt.show()
 
@@ -57,8 +62,11 @@ def process(led):
     plotting(led_stats, led_typ)
 
 if __name__=='__main__':
+    #### USER-INPUT ####
     inpt= [('255','55'), ('355','5500')]
     project_path= os.path.expanduser('~/Dropbox/Janmejoy_SUIT_Dropbox/\
 photometry/photometry_scripts/running_quality_checker_4k_v2_project/')
+    ####################
+    bake_list=[("2024-04-23", "2024-05-13"),("2024-08-01", "2024-08-09"), ("2024-08-12", "2024-08-20"), ("2024-08-22", "2024-09-11")]
     with ProcessPoolExecutor() as executor:
        executor.map(process, inpt)
